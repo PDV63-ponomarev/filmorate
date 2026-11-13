@@ -1,7 +1,7 @@
 package com.example.filmorate.controller;
 
-import com.example.filmorate.exception.InvalidEmailException;
 import com.example.filmorate.exception.UserAlreadyExistException;
+import com.example.filmorate.exception.UserNotFoundException;
 import com.example.filmorate.model.User;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -50,4 +50,43 @@ public class UserController {
         return user;
     }
 
+    @PutMapping("/{id}")
+    public User update(@PathVariable int id, @RequestBody @Valid User user){
+
+        // 1. Ищем существующего пользователя ПО ID из пути
+        User existing = users.get(id);
+        if (existing == null) {
+            throw new UserNotFoundException("Пользователь не найден: id=" + id);
+        }
+
+        // 2. Уникальность email
+        boolean emailTaken = users.values().stream()
+                .filter(u -> u.getId() != id)   // исключаем самого себя
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(user.getEmail()));
+        if (emailTaken) {
+            throw new UserAlreadyExistException("Email уже занят: " + user.getEmail());
+        }
+
+        // 3. Уникальность login
+        boolean loginTaken = users.values().stream()
+                .filter(u -> u.getId() != id)  // исключаем самого себя
+                .anyMatch(u -> u.getLogin().equals(user.getLogin()));
+        if (loginTaken) {
+            throw new UserAlreadyExistException("Логин уже занят: " + user.getLogin());
+        }
+
+        // 4. name опционален — подставляем login, если пусто (та же логика, что в create)
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+
+        // 5. id неизменяем — берём из пути, игнорируя то, что пришло в теле
+        user.setId(id);
+
+        // 6. Сохраняем (put по существующему ключу перезаписывает)
+        users.put(id, user);
+
+        log.info("Обновлён пользователь: id={}, login={}", id, user.getLogin());
+        return user;
+    }
 }
