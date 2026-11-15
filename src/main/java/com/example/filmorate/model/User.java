@@ -1,6 +1,7 @@
 package com.example.filmorate.model;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -13,7 +14,7 @@ public class User {
     @JsonProperty(access = Access.READ_ONLY)
     private int id;
 
-    @Email
+    @Email(regexp = ".+@.+\\..+", message = "Email должен содержать @ и домен с точкой")
     @NotBlank
     private String email;
 
@@ -24,6 +25,6 @@ public class User {
     private String name;
 
     @Past
-    private Instant birthday;
+    private LocalDate birthday;
 }
 

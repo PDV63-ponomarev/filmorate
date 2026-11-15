@@ -23,11 +23,13 @@ public class FilmController {
 
     @GetMapping
     public List<Film> findAll(){
+        log.info("GET. Запрос списка фильмов");
         return new ArrayList<>(films.values());
     }
 
     @PostMapping
     public Film create(@RequestBody @Valid Film film){
+        log.info("POST. Создание записи нового фильма");
         String name = film.getName();
 
         // Проверка на уникальность
@@ -47,7 +49,7 @@ public class FilmController {
 
     @PutMapping("/{id}")
     public Film update(@PathVariable int id, @RequestBody @Valid Film film){
-
+        log.info("PUT. Редактирование фильма");
         // 1. Ищем фильм по id
         Film existing = films.get(id);
         if (existing == null) {

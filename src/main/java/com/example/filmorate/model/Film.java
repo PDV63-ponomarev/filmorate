@@ -23,6 +23,6 @@ public class Film {
     @PastOrPresent
     private Instant releaseDate;
 
-    @PositiveOrZero
+    @Positive
     private int duration;
 }

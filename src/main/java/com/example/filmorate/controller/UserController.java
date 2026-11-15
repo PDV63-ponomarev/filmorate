@@ -21,11 +21,13 @@ public class UserController {
 
     @GetMapping
     public List<User> findAll(){
+        log.info("GET. Запрос списка пользователей");
         return new ArrayList<>(users.values());
     }
 
     @PostMapping
     public User create(@RequestBody @Valid User user){
+        log.info("POST. Создание записи нового пользователя");
         String email = user.getEmail();
         String login = user.getLogin();
 
@@ -52,6 +54,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public User update(@PathVariable int id, @RequestBody @Valid User user){
+        log.info("PUT. Редактирование пользователя");
 
         // 1. Ищем существующего пользователя ПО ID из пути
         User existing = users.get(id);
