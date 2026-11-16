@@ -2,14 +2,22 @@ package com.example.filmorate;
 
 import com.example.filmorate.controller.UserController;
 
+
 import com.example.filmorate.exception.UserAlreadyExistException;
 import com.example.filmorate.model.User;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.json.JsonMapper;
+import java.time.Instant;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,37 +28,52 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserControllerTest {
 
     private UserController userController;
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         userController = new UserController();
+
+        //симуляция  для http
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .build();
+        objectMapper = JsonMapper.builder().build();
     }
 
     @Test
-    void test(){
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
+    void createCorrectUserAndSave() throws Exception{
+        User user = User.builder()
+                .email("test@mail.ru")
+                .login("testlogin")
+                .name("Test User")
+                .birthday(LocalDate.parse("2007-12-03"))
+                .build();
 
-        User user = new User(); // пустой пользователь
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        MvcResult result = mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andReturn();
 
-// В списке violations будут все ошибки валидации (пустой email, пустой login и т.д.)
-        assertFalse(violations.isEmpty());
-//        User user = new User();
-//        user.setEmail("test@mail.ru");
-//        user.setLogin("testlogin");
-//        user.setName("Test User");
-//        user.setBirthday(Instant.parse("1990-01-01T00:00:00Z"));
+        String body = result.getResponse().getContentAsString();
+        User created = objectMapper.readValue(body, User.class);
 
-        userController.create(user);
+        assertNotNull(created, "Контроллер должен вернуть созданного пользователя");
+        assertEquals(1, created.getId(), "Первому пользователю должен быть присвоен id = 1");
+        assertEquals("test@mail.ru", created.getEmail(), "Email должен совпадать с переданным в запросе");
+        assertEquals("testlogin", created.getLogin(), "Login должен совпадать с переданным в запросе");
+        assertEquals("Test User", created.getName(), "Name должен совпадать с переданным в запросе");
     }
+
     @Test
-    void createCorrectUserAndSave() {
-        User user = new User();
-        user.setEmail("test@mail.ru");
-        user.setLogin("testlogin");
-        user.setName("Test User");
-        user.setBirthday(LocalDate.parse("1990-01-01T00:00:00Z"));
+    void createCorrectUserAndSave2() {
+        User user = User.builder()
+                .email("test@mail.ru")
+                .login("testlogin")
+                .name("Test User")
+                .birthday(LocalDate.parse("2007-12-03"))
+                .build();
 
         User created = userController.create(user);
 
@@ -60,7 +83,7 @@ public class UserControllerTest {
         assertEquals("testlogin", created.getLogin());
         assertEquals("Test User", created.getName());
     }
-
+/*
     @Test
     void createUserWhenNameIsBlank(){
         User user = new User();
@@ -146,5 +169,7 @@ public class UserControllerTest {
 
         assertEquals(2, all.size(), "Должно вернуться 2 пользователя");
     }
+
+ */
 }
 

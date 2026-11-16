@@ -6,13 +6,15 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class User {
 
     @JsonProperty(access = Access.READ_ONLY)
-    private int id;
+    private Integer  id;
 
     @Email(regexp = ".+@.+\\..+", message = "Email должен содержать @ и домен с точкой")
     @NotBlank
