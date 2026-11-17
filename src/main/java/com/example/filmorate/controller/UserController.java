@@ -45,18 +45,23 @@ public class UserController {
         }
 
         user.setId(nextId++);
-        log.info("Добавлен пользователь: {}", user.getName());
+        log.info("Добавлен пользователь: {} c ID: {}", user.getName(), user.getId());
 
         // Сохранение
         users.put(user.getId(), user);
         return user;
     }
 
-    @PutMapping("/{id}")
-    public User update(@PathVariable int id, @RequestBody @Valid User user){
+    @PutMapping()
+    public User update( @RequestBody @Valid User user){
         log.info("PUT. Редактирование пользователя");
 
-        // 1. Ищем существующего пользователя ПО ID из пути
+        // 1. Проверяем, что id передан и такой пользователь существует
+        if (user.getId() == null) { // если id в модели типа Integer (рекомендуется)
+            throw new UserNotFoundException("Id должен быть указан");
+        }
+
+        int id = user.getId();
         User existing = users.get(id);
         if (existing == null) {
             throw new UserNotFoundException("Пользователь не найден: id=" + id);
