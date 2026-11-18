@@ -2,6 +2,7 @@ package com.example.filmorate.controller;
 
 import com.example.filmorate.exception.FilmAlreadyExistException;
 import com.example.filmorate.exception.FilmNotFoundException;
+import com.example.filmorate.exception.UserNotFoundException;
 import com.example.filmorate.model.Film;
 
 
@@ -38,7 +39,6 @@ public class FilmController {
 
         if (nameExist) throw new FilmAlreadyExistException("Фильм с таким названием уже существует: " + name);
 
-
         film.setId(nextId++);
         log.info("Добавлен фильм: {}", film.getName());
 
@@ -47,10 +47,17 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping("/{id}")
-    public Film update(@PathVariable int id, @RequestBody @Valid Film film){
-        log.info("PUT. Редактирование фильма");
-        // 1. Ищем фильм по id
+    @PutMapping()
+    public Film update( @RequestBody @Valid Film film){
+
+        // 1. Проверяем, что id передан и такой фильм существует
+        if (film.getId() == null) { // если id в модели типа Integer (рекомендуется)
+            throw new UserNotFoundException("Id должен быть указан");
+        }
+        int id = film.getId();
+
+        log.info("PUT. Редактирование фильма с ид: {}", id);
+
         Film existing = films.get(id);
         if (existing == null) {
             throw new FilmNotFoundException("Фильм не найден: id=" + id);

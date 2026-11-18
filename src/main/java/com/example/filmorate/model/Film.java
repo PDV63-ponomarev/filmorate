@@ -1,16 +1,18 @@
 package com.example.filmorate.model;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class Film {
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private int id;
+    private Integer id;
 
     @NotBlank
     private String name;
@@ -21,7 +23,7 @@ public class Film {
 
     @NotNull
     @PastOrPresent
-    private Instant releaseDate;
+    private LocalDate releaseDate;
 
     @Positive
     private int duration;
