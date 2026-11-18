@@ -296,22 +296,26 @@ public class UserControllerTest {
                 .birthday(LocalDate.parse("2007-12-03"))
                 .build();
 
-        // 1. Создаём пользователя и достаём присвоенный ему id из ответа сервера
         JsonNode created = createdUser(user1);
-        int createdId = created.get("id").asInt();
+        int userId = created.get("id").asInt();
 
-        // 2. Устанавливаем этот id и новые данные в объект перед PUT-запросом
-        user1.setId(createdId);
-        user1.setEmail("test2@mail.ru");
-        user1.setLogin("login2");
-        user1.setName("User2");
-        user1.setBirthday(LocalDate.parse("2017-12-03"));
+        User userToUpdate = User.builder()
+                .id(userId)
+                .email("test2@mail.ru")
+                .login("login2")
+                .name("User2")
+                .birthday(LocalDate.parse("2017-12-03"))
+                .build();
 
-        // 3. Отправляем PUT-запрос и сохраняем новый ответ в переменную updated
-        JsonNode updated = updatedUser(user1);
+        MvcResult result = mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userToUpdate)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode updated = objectMapper.readTree(result.getResponse().getContentAsString());
 
-        // 4. Проверяем именно updated (а не старый created)
-        assertEquals(createdId, updated.get("id").asInt(),
+
+        assertEquals(userId, updated.get("id").asInt(),
                 "У пользователя должен был сохраниться ID = 1");
         assertEquals("test2@mail.ru", updated.get("email").asText(),
                 "Email должен измениться");
@@ -323,73 +327,35 @@ public class UserControllerTest {
                 "Birthday должен измениться");
     }
 
-//    @Test
-//    void putUser() throws Exception{
-//        User user1 = User.builder()
-//                .email("test@mail.ru")
-//                .login("login")
-//                .name("User")
-//                .birthday(LocalDate.parse("2007-12-03"))
-//                .build();
-//
-//        JsonNode created = createdUser(user1);
-//        int userId = created.get("id").asInt();
-//
-//        User userToUpdate = User.builder()
-//                .id(userId)
-//                .email("test2@mail.ru")
-//                .login("login2")
-//                .name("User2")
-//                .birthday(LocalDate.parse("2017-12-03"))
-//                .build();
-//
-//        MvcResult result = mockMvc.perform(put("/users")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(userToUpdate)))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//        JsonNode updated = objectMapper.readTree(result.getResponse().getContentAsString());
-//
-//
-//        assertEquals(userId, updated.get("id").asInt(),
-//                "У пользователя должен сохраниться прежний ID");
-//        assertEquals("test2@mail.ru", updated.get("email").asText(),
-//                "Email должен измениться");
-//        assertEquals("login2", updated.get("login").asText(),
-//                "Login должен измениться");
-//        assertEquals("User2", updated.get("name").asText(),
-//                "Name должен измениться");
-//        assertEquals("2017-12-03", updated.get("birthday").asText(),
-//                "Birthday должен измениться");
-//    }
+    @Test
+    void putUserWithUnknownIdShouldThrowException() throws Exception{
+        User user = User.builder()
+                .email("unknown@mail.ru")
+                .login("unknown")
+                .build();
+
+        JsonNode created = createdUser(user);
+        int userId = created.get("id").asInt();
+
+        User userToUpdate = User.builder()
+                .id(userId+1)
+                .email("unknown2@mail.ru")
+                .login("unknown2")
+                .build();
+
+        ServletException servletException = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userToUpdate))),
+                "При попытке обновить несуществующего пользователя должно выбрасываться исключение"
+        );
+
+        assertInstanceOf(UserNotFoundException.class, servletException.getCause(),
+                "Причиной должно быть UserNotFoundException");
+    }
 
 
-/*
-
-@Test
-void putUserWithUnknownIdShouldThrowException() {
-    User unknownUser = User.builder()
-            .id(999)
-            .email("unknown@mail.ru")
-            .login("unknown")
-            .name("Unknown")
-            .birthday(LocalDate.parse("2000-01-01"))
-            .build();
-
-    ServletException servletException = assertThrows(
-            ServletException.class,
-            () -> mockMvc.perform(put("/users")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(unknownUser))),
-            "При попытке обновить несуществующего пользователя должно выбрасываться исключение"
-    );
-
-    // Подставьте здесь ваш класс исключения (например, NotFoundException.class)
-    assertInstanceOf(NotFoundException.class, servletException.getCause(),
-            "Причиной должно быть NotFoundException");
-}
-
- */
 
 }
 

@@ -13,8 +13,7 @@ import lombok.Data;
 @Builder
 public class User {
 
-    @JsonProperty(access = Access.READ_ONLY)
-    private Integer  id;
+    private Integer id;
 
     @Email(regexp = ".+@.+\\..+", message = "Email должен содержать @ и домен с точкой")
     @NotBlank

@@ -53,15 +53,15 @@ public class UserController {
     }
 
     @PutMapping()
-    public User update( @RequestBody @Valid User user){
-        log.info("PUT. Редактирование пользователя");
+    public User update(@RequestBody @Valid User user){
+        log.info("PUT. Редактирование пользователя c ID: {}", user.getId());
 
         // 1. Проверяем, что id передан и такой пользователь существует
         if (user.getId() == null) { // если id в модели типа Integer (рекомендуется)
             throw new UserNotFoundException("Id должен быть указан");
         }
-
         int id = user.getId();
+
         User existing = users.get(id);
         if (existing == null) {
             throw new UserNotFoundException("Пользователь не найден: id=" + id);
@@ -89,7 +89,7 @@ public class UserController {
         }
 
         // 5. id неизменяем — берём из пути, игнорируя то, что пришло в теле
-        user.setId(id);
+//        user.setId(id);
 
         // 6. Сохраняем (put по существующему ключу перезаписывает)
         users.put(id, user);
