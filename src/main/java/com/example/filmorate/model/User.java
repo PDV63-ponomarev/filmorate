@@ -1,10 +1,7 @@
 package com.example.filmorate.model;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;

@@ -31,7 +31,6 @@ public class UserController {
         String email = user.getEmail();
         String login = user.getLogin();
 
-        // Проверка на уникальность
         boolean emailExists = users.values().stream()
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
         boolean loginExists = users.values().stream()
@@ -47,7 +46,6 @@ public class UserController {
         user.setId(nextId++);
         log.info("Добавлен пользователь: {} c ID: {}", user.getName(), user.getId());
 
-        // Сохранение
         users.put(user.getId(), user);
         return user;
     }
@@ -56,7 +54,6 @@ public class UserController {
     public User update(@RequestBody @Valid User user){
         log.info("PUT. Редактирование пользователя c ID: {}", user.getId());
 
-        // 1. Проверяем, что id передан и такой пользователь существует
         if (user.getId() == null) { // если id в модели типа Integer (рекомендуется)
             throw new UserNotFoundException("Id должен быть указан");
         }
@@ -67,7 +64,6 @@ public class UserController {
             throw new UserNotFoundException("Пользователь не найден: id=" + id);
         }
 
-        // 2. Уникальность email
         boolean emailTaken = users.values().stream()
                 .filter(u -> u.getId() != id)   // исключаем самого себя
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(user.getEmail()));
@@ -75,7 +71,6 @@ public class UserController {
             throw new UserAlreadyExistException("Email уже занят: " + user.getEmail());
         }
 
-        // 3. Уникальность login
         boolean loginTaken = users.values().stream()
                 .filter(u -> u.getId() != id)  // исключаем самого себя
                 .anyMatch(u -> u.getLogin().equals(user.getLogin()));
@@ -83,15 +78,10 @@ public class UserController {
             throw new UserAlreadyExistException("Логин уже занят: " + user.getLogin());
         }
 
-        // 4. name опционален — подставляем login, если пусто (та же логика, что в create)
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
 
-        // 5. id неизменяем — берём из пути, игнорируя то, что пришло в теле
-//        user.setId(id);
-
-        // 6. Сохраняем (put по существующему ключу перезаписывает)
         users.put(id, user);
 
         log.info("Обновлён пользователь: id={}, login={}", id, user.getLogin());

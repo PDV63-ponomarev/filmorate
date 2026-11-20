@@ -42,7 +42,6 @@ public class FilmController {
         film.setId(nextId++);
         log.info("Добавлен фильм: {}", film.getName());
 
-        // Сохранение
         films.put(film.getId(), film);
         return film;
     }

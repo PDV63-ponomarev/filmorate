@@ -1,11 +1,8 @@
 package com.example.filmorate;
 
 import com.example.filmorate.controller.FilmController;
-import com.example.filmorate.controller.UserController;
 import com.example.filmorate.exception.FilmAlreadyExistException;
-import com.example.filmorate.exception.UserAlreadyExistException;
 import com.example.filmorate.model.Film;
-import com.example.filmorate.model.User;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
